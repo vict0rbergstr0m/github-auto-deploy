@@ -8,8 +8,8 @@ docker build -t deploy-webhook -f Dockerfile.webhook .
 # Run the webhook container
 docker run -d \
   --name deploy-webhook \
+  --network caddy \
   --restart unless-stopped \
-  -p 9000:9000 \
   --env-file .env \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /home/victor/Projects/github-auto-deploy/app.env:/app/app.env:ro \

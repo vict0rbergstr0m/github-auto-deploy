@@ -1,4 +1,4 @@
-#This is the external link http://victorsserver.duckdns.org:9000/health
+#This is the external link https://victorsserver.duckdns.org:9000/health
 
 import subprocess
 import os
@@ -10,6 +10,7 @@ app = FastAPI()
 
 # Read the secret token from environment variables (fallback for local testing)
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "my-super-secret-token")
+NETWORK = os.getenv("NETWORK", "caddy")
 
 class DeployPayload(BaseModel):
     registry: str
@@ -40,8 +41,9 @@ def deploy(payload: DeployPayload, x_webhook_token: str = Header(None)):
         run_cmd = [
             'docker', 'run', '-d',
             '--name', container_name,
+            '--network', NETWORK,
             '--restart', 'unless-stopped',
-            '-p', '8082:8000',
+            # '-p', '8082:8000',
         ]
 
         if os.path.exists('/app/app.env'):
@@ -67,7 +69,7 @@ def deploy(payload: DeployPayload, x_webhook_token: str = Header(None)):
         return {"status": "success", "message": f"Successfully deployed {payload.image}"}
 
     except subprocess.CalledProcessError as e:
-        error_msg = e.stderr.decode() if e.stderr else str(e)
+        error_msg = e.stderr if e.stderr else str(e)
         raise HTTPException(status_code=500, detail=f"Deployment failed: {error_msg}")
 
 
