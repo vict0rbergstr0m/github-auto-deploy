@@ -32,7 +32,7 @@ docker build -t deploy-webhook -f Dockerfile.webhook .
 
 # Run the container
 # Note: Update the absolute path to your app.env file!
-# Node: for --network, its recomended to use TLS e.g. via caddy for https
+# Node: for --network, its recomended to use TLS e.g. via caddy for https. If use network, no need for -p
 docker run -d \
   --name deploy-webhook \
   --restart unless-stopped \
