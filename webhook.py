@@ -17,6 +17,7 @@ class DeployPayload(BaseModel):
     image: str
     username: str
     password: str
+    # env: dict[str, str]
 
 @app.post("/deploy")
 def deploy(payload: DeployPayload, x_webhook_token: str = Header(None)):
@@ -45,6 +46,8 @@ def deploy(payload: DeployPayload, x_webhook_token: str = Header(None)):
             '--restart', 'unless-stopped',
             # '-p', '8082:8000',
         ]
+        # for key, value in payload.env.items():
+        #     run_cmd.extend(["-e", f"{key}={value}"])
 
         if os.path.exists('/app/app.env'):
             run_cmd.extend(['--env-file', '/app/app.env'])
@@ -54,7 +57,7 @@ def deploy(payload: DeployPayload, x_webhook_token: str = Header(None)):
         subprocess.run(run_cmd, check=True, text=True, capture_output=True)
 
         # 5. WAIT AND VERIFY
-        time.sleep(5) 
+        time.sleep(5)
 
         inspect_cmd = ['docker', 'inspect', '-f', '{{.State.Status}}', container_name]
         inspect_result = subprocess.run(inspect_cmd, check=True, text=True, capture_output=True)
@@ -79,9 +82,9 @@ def health_check():
     try:
         # Ping docker to ensure the socket is mounted and working
         subprocess.run(
-            ['docker', 'info'], 
-            check=True, 
-            stdout=subprocess.PIPE, 
+            ['docker', 'info'],
+            check=True,
+            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
         return {"status": "healthy", "docker": "connected"}
